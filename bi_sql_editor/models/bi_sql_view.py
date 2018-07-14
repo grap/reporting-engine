@@ -64,7 +64,9 @@ class BiSQLView(models.Model):
 
     is_materialized = fields.Boolean(
         string='Is Materialized View', default=True, readonly=True,
-        states={'draft': [('readonly', False)]})
+        states={
+            'draft': [('readonly', False)],
+            'sql_valid': [('readonly', False)]})
 
     materialized_text = fields.Char(
         compute='_compute_materialized_text', store=True)
@@ -136,6 +138,15 @@ class BiSQLView(models.Model):
 
     rule_id = fields.Many2one(
         string='Odoo Rule', comodel_name='ir.rule', readonly=True)
+
+    # Constrains Section
+    @api.constrains('is_materialized')
+    @api.multi
+    def _check_index_materialized(self):
+        for rec in self.filtered(lambda x: not x.is_materialized):
+            if rec.bi_sql_view_field_ids.filtered(lambda x: x.is_index):
+                raise UserError(_(
+                    'You can not create indexes on non materialized views'))
 
     @api.constrains('view_order')
     @api.multi
