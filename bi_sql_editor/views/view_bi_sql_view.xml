@@ -11,6 +11,7 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
         <field name="model">bi.sql.view</field>
         <field name="arch" type="xml">
             <tree decoration-info="state=='draft'" decoration-warning="state in ('sql_valid', 'model_valid')">
+                <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="technical_name"/>
                 <field name="size"/>

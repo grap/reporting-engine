@@ -31,6 +31,7 @@ class BaseModel(models.AbstractModel):
 
 class BiSQLView(models.Model):
     _name = 'bi.sql.view'
+    _order = 'sequence'
     _inherit = ['sql.request.mixin']
 
     _sql_prefix = 'x_bi_sql_view_'
@@ -145,10 +146,12 @@ class BiSQLView(models.Model):
         string='Odoo Rule', comodel_name='ir.rule', readonly=True)
 
     group_ids = fields.Many2many(
-         comodel_name='res.groups', readonly=True, states={
+        comodel_name='res.groups', readonly=True, states={
             'draft': [('readonly', False)],
             'sql_valid': [('readonly', False)],
         })
+
+    sequence = fields.Integer(string='sequence')
 
     # Constrains Section
     @api.constrains('is_materialized')
@@ -197,6 +200,14 @@ class BiSQLView(models.Model):
             self.has_group_changed = True
 
     # Overload Section
+    @api.multi
+    def write(self, vals):
+        res = super(BiSQLView, self).write(vals)
+        if vals.get('sequence', False):
+            for rec in self.filtered(lambda x: x.menu_id):
+                rec.menu_id.sequence = rec.sequence
+        return res
+
     @api.multi
     def unlink(self):
         if any(view.state not in ('draft', 'sql_valid') for view in self):
@@ -436,6 +447,7 @@ class BiSQLView(models.Model):
             'name': self.name,
             'parent_id': self.env.ref('bi_sql_editor.menu_bi_sql_editor').id,
             'action': 'ir.actions.act_window,%s' % (self.action_id.id),
+            'sequence': self.sequence,
         }
 
     # Custom Section
