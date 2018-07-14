@@ -432,13 +432,22 @@ class BiSQLView(models.Model):
         else:
             view_id = self.graph_view_id.id
         return {
-            'name': self.name,
+            'name': self._prepare_action_name(),
             'res_model': self.model_id.model,
             'type': 'ir.actions.act_window',
             'view_mode': view_mode,
             'view_id': view_id,
             'search_view_id': self.search_view_id.id,
         }
+
+    @api.multi
+    def _prepare_action_name(self):
+        self.ensure_one()
+        if not self.is_materialized:
+            return self.name
+        return "%s (%s)" % (
+            self.name,
+            datetime.utcnow().strftime(_("%m/%d/%Y %H:%M:%S UTC")))
 
     @api.multi
     def _prepare_menu(self):
@@ -612,9 +621,7 @@ class BiSQLView(models.Model):
             if sql_view.action_id:
                 # Alter name of the action, to display last refresh
                 # datetime of the materialized view
-                sql_view.action_id.name = "%s (%s)" % (
-                    self.name,
-                    datetime.utcnow().strftime(_("%m/%d/%Y %H:%M:%S UTC")))
+                sql_view.action_id.name = sql_view._prepare_action_name()
 
     @api.multi
     def _refresh_size(self):
