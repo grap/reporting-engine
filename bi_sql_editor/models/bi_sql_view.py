@@ -66,7 +66,8 @@ class BiSQLView(models.Model):
         string='Is Materialized View', default=True, readonly=True,
         states={
             'draft': [('readonly', False)],
-            'sql_valid': [('readonly', False)]})
+            'sql_valid': [('readonly', False)],
+        })
 
     materialized_text = fields.Char(
         compute='_compute_materialized_text', store=True)
@@ -96,13 +97,17 @@ class BiSQLView(models.Model):
         "FROM my_table")
 
     domain_force = fields.Text(
-        string='Extra Rule Definition', default="[]", help="Define here"
-        " access restriction to data.\n"
+        string='Extra Rule Definition', default="[]", readonly=True,
+        help="Define here access restriction to data.\n"
         " Take care to use field name prefixed by 'x_'."
         " A global 'ir.rule' will be created."
         " A typical Multi Company rule is for exemple \n"
         " ['|', ('x_company_id','child_of', [user.company_id.id]),"
-        "('x_company_id','=',False)].")
+        "('x_company_id','=',False)].",
+        states={
+            'draft': [('readonly', False)],
+            'sql_valid': [('readonly', False)],
+        })
 
     has_group_changed = fields.Boolean(copy=False)
 
@@ -138,6 +143,12 @@ class BiSQLView(models.Model):
 
     rule_id = fields.Many2one(
         string='Odoo Rule', comodel_name='ir.rule', readonly=True)
+
+    group_ids = fields.Many2many(
+         comodel_name='res.groups', readonly=True, states={
+            'draft': [('readonly', False)],
+            'sql_valid': [('readonly', False)],
+        })
 
     # Constrains Section
     @api.constrains('is_materialized')
