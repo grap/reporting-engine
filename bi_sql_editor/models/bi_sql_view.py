@@ -604,18 +604,17 @@ class BiSQLView(models.Model):
 
     @api.multi
     def _refresh_materialized_view(self):
-        for sql_view in self:
-            if sql_view.is_materialized:
-                req = "REFRESH %s VIEW %s" % (
-                    sql_view.materialized_text, sql_view.view_name)
-                self._log_execute(req)
-                sql_view._refresh_size()
-                if sql_view.action_id:
-                    # Alter name of the action, to display last refresh
-                    # datetime of the materialized view
-                    sql_view.action_id.name = "%s (%s)" % (
-                        self.name,
-                        datetime.utcnow().strftime(_("%m/%d/%Y %H:%M:%S UTC")))
+        for sql_view in self.filtered(lambda x: x.is_materialized):
+            req = "REFRESH %s VIEW %s" % (
+                sql_view.materialized_text, sql_view.view_name)
+            self._log_execute(req)
+            sql_view._refresh_size()
+            if sql_view.action_id:
+                # Alter name of the action, to display last refresh
+                # datetime of the materialized view
+                sql_view.action_id.name = "%s (%s)" % (
+                    self.name,
+                    datetime.utcnow().strftime(_("%m/%d/%Y %H:%M:%S UTC")))
 
     @api.multi
     def _refresh_size(self):
