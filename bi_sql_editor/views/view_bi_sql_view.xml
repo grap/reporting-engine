@@ -98,11 +98,9 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                             <group string="Rule Definition">
                                 <field name="domain_force" nolabel="1" colspan="4"/>
                             </group>
-                            <group>
-                                <group string="Allowed Groups">
-                                    <field name="group_ids" nolabel="1"/>
-                                    <field name="has_group_changed" invisible="1"/>
-                                </group>
+                            <group string="Allowed Groups">
+                                <field name="group_ids" nolabel="1" colspan="4"/>
+                                <field name="has_group_changed" invisible="1"/>
                             </group>
                         </page>
                         <page string="Extras Information">
